@@ -1,0 +1,97 @@
+table Pilotos
+	lineageTag: 7bef2542-2fe4-4869-9de0-e341c88c2504
+
+	column PilotoId
+		dataType: string
+		lineageTag: 3cc1baf2-5be9-45fd-9425-41d76c1c198f
+		summarizeBy: none
+		sourceColumn: PilotoId
+
+	column Codigo
+		dataType: string
+		lineageTag: 2203f3b8-ed4e-4408-b4bf-e90308e42283
+		summarizeBy: none
+		sourceColumn: Codigo
+
+	column Numero
+		dataType: string
+		lineageTag: 030ac8b1-d08b-40d6-9fc1-945f0220ed0b
+		summarizeBy: none
+		sourceColumn: Numero
+
+	column Nome
+		dataType: string
+		lineageTag: dbbbd4a5-bf75-4c64-b74d-4b32fec994f6
+		summarizeBy: none
+		sourceColumn: Nome
+
+	column Sobrenome
+		dataType: string
+		lineageTag: 04ecb470-0086-43af-8933-15d4c56c0388
+		summarizeBy: none
+		sourceColumn: Sobrenome
+
+	column NomeCompleto
+		dataType: string
+		lineageTag: 797a6b91-8ece-488a-865b-fa21c4087bdc
+		summarizeBy: none
+		sourceColumn: NomeCompleto
+
+	column Nascimento
+		dataType: string
+		lineageTag: d0a71c34-a585-4082-aca4-c330830fef0e
+		summarizeBy: none
+		sourceColumn: Nascimento
+
+	column Nacionalidade
+		dataType: string
+		lineageTag: f192afec-5946-4668-bc6d-2941132756e0
+		summarizeBy: none
+		sourceColumn: Nacionalidade
+
+	column UrlWiki
+		dataType: string
+		lineageTag: d92cc4a2-4c24-4995-89da-dc2ce2625f91
+		dataCategory: WebUrl
+		summarizeBy: none
+		sourceColumn: UrlWiki
+
+	column PilotoKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e5b9f52c-b6ec-4e5e-8c38-de50d3cb0253
+		summarizeBy: none
+		sourceColumn: PilotoKey
+
+	partition Pilotos = m
+		mode: import
+		source =
+				let
+				    DeResultados = List.Combine(List.Transform(RawResultados, (c) => List.Transform(c[Results], (x) => x[Driver]))),
+				    DeSprints = List.Combine(List.Transform(RawSprints, (c) => List.Transform(c[SprintResults], (x) => x[Driver]))),
+				    DeVitorias = List.Combine(List.Transform(RawVitorias, (c) => List.Transform(c[Results], (x) => x[Driver]))),
+				    DeClassif = List.Combine(List.Transform(RawClassifPilotos, (s) => List.Transform(s[DriverStandings], (x) => x[Driver]))),
+				    Todos = DeResultados & DeSprints & DeVitorias & DeClassif,
+				    Linhas = List.Transform(Todos, (d) =>
+				        [
+				            PilotoId = d[driverId],
+				            Codigo = Record.FieldOrDefault(d, "code", ""),
+				            Numero = Record.FieldOrDefault(d, "permanentNumber", ""),
+				            Nome = d[givenName],
+				            Sobrenome = d[familyName],
+				            NomeCompleto = d[givenName] & " " & d[familyName],
+				            Nascimento = Record.FieldOrDefault(d, "dateOfBirth", ""),
+				            Nacionalidade = Record.FieldOrDefault(d, "nationality", ""),
+				            UrlWiki = Record.FieldOrDefault(d, "url", "")
+				        ]),
+				    Tipo = type table [PilotoId = text, Codigo = text, Numero = text, Nome = text, Sobrenome = text, NomeCompleto = text, Nascimento = text, Nacionalidade = text, UrlWiki = text],
+				    Tabela = Table.Distinct(Value.ReplaceType(Table.FromRecords(Linhas, Table.ColumnNames(#table(Tipo, {}))), Tipo), {"PilotoId"}),
+				    Limpa = Table.ReplaceValue(Tabela, null, "", Replacer.ReplaceValue, {"Codigo", "Numero", "Nascimento", "Nacionalidade", "UrlWiki"}),
+				    Ordenado = Table.Sort(Limpa, {{"PilotoId", Order.Ascending}}),
+				    ComChave = Table.AddIndexColumn(Ordenado, "PilotoKey", 1, 1, Int64.Type)
+				in
+				    ComChave
+
+	annotation PBI_ResultType = Exception
+

@@ -1,0 +1,85 @@
+table ClassifPilotos
+	lineageTag: c959d6c6-e075-4556-bff2-b7e5559c8be4
+
+	column Temporada
+		dataType: int64
+		formatString: 0
+		lineageTag: aaf113d3-580e-4ad8-a812-db969b35dd99
+		summarizeBy: none
+		sourceColumn: Temporada
+
+	column Rodada
+		dataType: int64
+		formatString: 0
+		lineageTag: 58430742-7e55-4d25-b2a6-b12331764849
+		summarizeBy: none
+		sourceColumn: Rodada
+
+	column Posicao
+		dataType: int64
+		formatString: 0
+		lineageTag: c24b36e1-6bfd-40f3-a449-dbf4c9f16b57
+		summarizeBy: none
+		sourceColumn: Posicao
+
+	column PilotoKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 981548f1-0032-4016-bd57-041ac2722e9c
+		summarizeBy: none
+		sourceColumn: PilotoKey
+
+	column EquipeKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: cbc58db1-876f-4766-8358-af790853add8
+		summarizeBy: none
+		sourceColumn: EquipeKey
+
+	column Pontos
+		dataType: double
+		formatString: #,0.#
+		lineageTag: e6156ea8-c566-4884-8834-922556a73ab7
+		summarizeBy: none
+		sourceColumn: Pontos
+
+	column NumVitorias
+		dataType: int64
+		formatString: 0
+		lineageTag: d24ac57d-3e69-4436-b42f-962933523e85
+		summarizeBy: none
+		sourceColumn: NumVitorias
+
+	partition ClassifPilotos = m
+		mode: import
+		source =
+				let
+				    MapaP = Record.FromList(Pilotos[PilotoKey], Pilotos[PilotoId]),
+				    MapaE = Record.FromList(Equipes[EquipeKey], Equipes[EquipeId]),
+				    Linhas = List.Combine(List.Transform(RawClassifPilotos, (s) =>
+				        let
+				            Ano = Number.From(s[season]),
+				            Rod = Number.From(s[round])
+				        in
+				            List.Transform(s[DriverStandings], (x) =>
+				                let
+				                    Eqs = Record.FieldOrDefault(x, "Constructors", {}),
+				                    Pos = Record.FieldOrDefault(x, "position", null)
+				                in
+				                    [
+				                        Temporada = Ano,
+				                        Rodada = Rod,
+				                        Posicao = if Pos = null then null else Number.From(Pos),
+				                        PilotoKey = Record.Field(MapaP, x[Driver][driverId]),
+				                        EquipeKey = if List.IsEmpty(Eqs) then null else Record.Field(MapaE, List.Last(Eqs)[constructorId]),
+				                        Pontos = Number.From(Record.FieldOrDefault(x, "points", "0"), "en-US"),
+				                        NumVitorias = Number.From(Record.FieldOrDefault(x, "wins", "0"))
+				                    ])
+				    )),
+				    Tipo = type table [Temporada = Int64.Type, Rodada = Int64.Type, Posicao = Int64.Type, PilotoKey = Int64.Type, EquipeKey = Int64.Type, Pontos = number, NumVitorias = Int64.Type],
+				    Tabela = Value.ReplaceType(Table.FromRecords(Linhas, Table.ColumnNames(#table(Tipo, {}))), Tipo)
+				in
+				    Tabela
+

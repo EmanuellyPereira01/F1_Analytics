@@ -1,0 +1,67 @@
+.du-lado { top: 60px; width: 286px; height: 644px; padding: 12px; overflow: visible; }
+.du-a { left: 16px; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 18%, transparent), transparent 55%), var(--card); }
+.du-b { left: 978px; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 18%, transparent), transparent 55%), var(--card); }
+.du-sel { position: relative; z-index: 20; }
+.du-perfil { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.du-foto { margin: 20px 0 12px; }
+.du-foto .f1-av.grande { width: 140px; height: 140px; }
+.du-nome { display: flex; flex-direction: column; line-height: 1; }
+.du-nome span { color: var(--txt2); font-size: 18px; }
+.du-nome b { font-size: 32px; font-weight: 900; text-transform: uppercase; }
+.du-meta { margin-top: 8px; font-weight: 600; display: flex; gap: 6px; align-items: center; }
+.du-eqs { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 12px 0; }
+.du-ger { width: 74px; height: 74px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(150deg, var(--c), #0B0D12 140%); margin: 6px 0 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, .45); }
+.du-ger b { font-size: 36px; font-weight: 900; line-height: 1; color: #fff; text-shadow: 0 2px 8px rgba(0, 0, 0, .4); }
+.du-ger small { font-size: 9px; letter-spacing: 2px; font-weight: 700; color: #fff; }
+.du-tit { font-size: 12px; color: var(--txt2); font-weight: 600; }
+.du-atr { width: 100%; margin-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+.du-atr div { display: grid; grid-template-columns: 104px 1fr 24px; gap: 8px; align-items: center; font-size: 11px; color: var(--txt2); text-align: left; }
+.du-atr i { height: 6px; background: #1A1F2B; border-radius: 3px; overflow: hidden; }
+.du-atr i b { display: block; height: 100%; border-radius: 3px; transition: width .5s; }
+.du-atr em { font-style: normal; font-weight: 900; color: #fff; text-align: right; }
+.du-tit span { color: #FFD24A; }
+
+.du-centro { left: 318px; top: 60px; width: 644px; height: 350px; padding: 10px 18px; }
+.du-vs { position: absolute; left: 50%; top: -8px; transform: translateX(-50%); width: 44px; height: 30px; border-radius: 8px; background: var(--red); display: grid; place-items: center; font-weight: 900; font-style: italic; cursor: pointer; z-index: 2; box-shadow: 0 4px 14px rgba(225, 6, 0, .5); }
+.du-vs:hover { filter: brightness(1.15); }
+.du-placar { display: flex; justify-content: center; align-items: baseline; gap: 18px; margin: 14px 0 6px; }
+.du-placar b { font-size: 26px; font-weight: 900; }
+.du-placar small { color: var(--txt3); text-transform: uppercase; letter-spacing: 1.2px; font-size: 10px; font-weight: 700; }
+.du-lin { display: grid; grid-template-columns: 70px 1fr 160px 1fr 70px; align-items: center; gap: 8px; height: 27px; }
+.du-lin > b { font-size: 14px; font-weight: 700; color: var(--txt2); }
+.du-lin > b:first-child { text-align: right; }
+.du-lin > b.ven { color: #fff; font-weight: 900; text-shadow: 0 0 12px var(--c); }
+.du-lin > span { text-align: center; font-size: 11.5px; color: var(--txt2); font-weight: 600; }
+.du-bar { height: 8px; background: #1A1F2B; border-radius: 4px; overflow: hidden; display: flex; }
+.du-bar.e { justify-content: flex-end; }
+.du-bar i { height: 100%; border-radius: 4px; transition: width .5s cubic-bezier(.2, .8, .2, 1); }
+
+.du-comp { left: 318px; top: 422px; width: 238px; height: 282px; padding: 12px; }
+.du-comp-info { font-size: 11px; color: var(--txt2); margin: 10px 0 10px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.du-h2h { margin-top: 14px; }
+.du-h2h-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; color: var(--txt2); }
+.du-h2h-top b { font-size: 15px; font-weight: 900; }
+.du-h2h-bar { display: flex; height: 7px; border-radius: 4px; overflow: hidden; gap: 2px; margin-top: 2px; background: #1A1F2B; }
+.du-h2h-bar i { height: 100%; transition: width .5s; }
+.du-comp-rod { margin-top: 8px; font-size: 10.5px; color: var(--txt3); }
+.du-comp-rod b { color: var(--txt2); }
+.du-nunca { color: var(--txt2); text-align: center; padding: 40px 10px; font-size: 12.5px; }
+.du-nunca small { display: block; margin-top: 6px; color: var(--txt3); }
+
+.du-graf { left: 568px; top: 422px; width: 394px; height: 160px; padding: 12px 0 0; }
+.du-graf .f1-rot { padding: 0 12px; }
+.du-graf svg .g { stroke: #222836; }
+.du-graf svg .gt { fill: var(--txt3); font-size: 9px; text-anchor: end; }
+.du-graf svg .ax { fill: var(--txt3); font-size: 9.5px; text-anchor: middle; }
+.du-graf svg .ln { fill: none; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+.du-graf svg circle { stroke: #12161E; stroke-width: 1.5; cursor: pointer; }
+
+.du-rivais { left: 568px; top: 594px; width: 394px; height: 110px; padding: 10px 12px; }
+.du-rivais-corpo { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; margin-top: 6px; max-height: 70px; }
+.du-par { display: flex; align-items: center; gap: 3px; padding: 2px 4px; border-radius: 6px; cursor: pointer; font-size: 11px; }
+.du-par:hover { background: #1A1F2B; }
+.du-par.on { background: #232B3C; }
+.du-par .f1-av.mini { width: 18px; height: 18px; }
+.du-par .f1-av.mini span { font-size: 7px; }
+.du-par span { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 3px; }
+.du-par em { font-style: normal; color: var(--txt3); font-size: 10px; }

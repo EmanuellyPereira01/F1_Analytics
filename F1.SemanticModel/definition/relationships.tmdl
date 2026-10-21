@@ -1,0 +1,60 @@
+relationship 00e774fc-3c1c-4d92-85f3-019b64afd7c3
+	fromColumn: Corridas.CircuitoKey
+	toColumn: Circuitos.CircuitoKey
+
+relationship 97f39b94-8a64-42b9-b875-279730f301c4
+	fromColumn: Resultados.CorridaKey
+	toColumn: Corridas.CorridaKey
+
+relationship 49fa39b2-8dce-4c21-aaa5-607400b31170
+	fromColumn: Resultados.PilotoKey
+	toColumn: Pilotos.PilotoKey
+
+relationship e769f62f-8adf-4787-8fa2-6bbf7fadda74
+	fromColumn: Resultados.EquipeKey
+	toColumn: Equipes.EquipeKey
+
+relationship b7c61b1e-84ce-4bf5-b9cb-e54395b2d237
+	fromColumn: Sprints.CorridaKey
+	toColumn: Corridas.CorridaKey
+
+relationship 2e9a5683-73a2-4479-aa86-16197adb01a8
+	fromColumn: Sprints.PilotoKey
+	toColumn: Pilotos.PilotoKey
+
+relationship 01cb76e0-47cf-4d09-8462-a1d3d8b434db
+	fromColumn: Sprints.EquipeKey
+	toColumn: Equipes.EquipeKey
+
+relationship 9fcc589a-b93a-48a4-8985-67dc1a90c1eb
+	fromColumn: Vitorias.CorridaKey
+	toColumn: Corridas.CorridaKey
+
+relationship 8a345d90-56fe-4be7-8b66-14a498604bdb
+	fromColumn: Vitorias.PilotoKey
+	toColumn: Pilotos.PilotoKey
+
+relationship 4837778f-1baa-4190-8523-6cdc34cb1799
+	fromColumn: Vitorias.EquipeKey
+	toColumn: Equipes.EquipeKey
+
+relationship d8f59a63-8c60-40b2-90bb-d43553e1c12d
+	fromColumn: ClassifPilotos.PilotoKey
+	toColumn: Pilotos.PilotoKey
+
+relationship 4f91f05c-f649-440d-9a81-333456fd7f03
+	fromColumn: ClassifPilotos.EquipeKey
+	toColumn: Equipes.EquipeKey
+
+relationship b48d979f-368f-4586-a691-b60849dbcf3b
+	fromColumn: ClassifEquipes.EquipeKey
+	toColumn: Equipes.EquipeKey
+
+relationship 1c7b283a-dbb9-487c-b2c0-0bea16965b7d
+	fromColumn: CampeoesHistoricos.PilotoKey
+	toColumn: Pilotos.PilotoKey
+
+relationship 353224e6-d829-4d54-85bf-22df101904b2
+	fromColumn: FotosPilotos.PilotoId
+	toColumn: Pilotos.PilotoId
+

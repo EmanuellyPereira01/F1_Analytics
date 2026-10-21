@@ -1,0 +1,184 @@
+table Resultados
+	lineageTag: e7b9d3d4-174f-4a4d-a5dc-d3847ab9216d
+
+	column CorridaKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 467d42d7-5f7d-4ef2-b312-eb2d080377ae
+		summarizeBy: none
+		sourceColumn: CorridaKey
+
+	column Temporada
+		dataType: int64
+		formatString: 0
+		lineageTag: d4bb71ac-d923-4c5d-9884-97ab8b6d0c98
+		summarizeBy: none
+		sourceColumn: Temporada
+
+	column Rodada
+		dataType: int64
+		formatString: 0
+		lineageTag: 70f6291b-c03e-4521-b347-d68ed69c6d3c
+		summarizeBy: none
+		sourceColumn: Rodada
+
+	column PilotoKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8f14f525-aaa4-4500-8092-6904c657b820
+		summarizeBy: none
+		sourceColumn: PilotoKey
+
+	column EquipeKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5d2b54dd-d879-485d-9e8b-a5bfb378881a
+		summarizeBy: none
+		sourceColumn: EquipeKey
+
+	column PilotoId
+		dataType: string
+		isHidden
+		lineageTag: 04ae26ed-43c7-49bc-8c9f-50c6f90c9076
+		summarizeBy: none
+		sourceColumn: PilotoId
+
+	column EquipeId
+		dataType: string
+		isHidden
+		lineageTag: 7cea13d9-c708-4e29-a22b-0bd9e1eaa3ee
+		summarizeBy: none
+		sourceColumn: EquipeId
+
+	column NumeroCarro
+		dataType: string
+		lineageTag: 938f1a92-af75-48c1-adda-ba9437dbc4b7
+		summarizeBy: none
+		sourceColumn: NumeroCarro
+
+	column Grid
+		dataType: int64
+		formatString: 0
+		lineageTag: b510346c-fe2e-4865-ae13-3724bbe6005c
+		summarizeBy: none
+		sourceColumn: Grid
+
+	column Posicao
+		dataType: int64
+		formatString: 0
+		lineageTag: 6f7f0a2d-6aee-450f-b48b-dc84cbe367e5
+		summarizeBy: none
+		sourceColumn: Posicao
+
+	column PosicaoTexto
+		dataType: string
+		lineageTag: 6b7cd3c7-0e45-4e07-9e89-42c7a242c7eb
+		summarizeBy: none
+		sourceColumn: PosicaoTexto
+
+	column Pontos
+		dataType: double
+		formatString: #,0.#
+		lineageTag: 802b922f-4776-4851-852b-55efa3afb4e8
+		summarizeBy: none
+		sourceColumn: Pontos
+
+	column Voltas
+		dataType: int64
+		formatString: 0
+		lineageTag: 7b0181cb-6db1-41bf-a5a8-4c78a23ab729
+		summarizeBy: none
+		sourceColumn: Voltas
+
+	column Status
+		dataType: string
+		lineageTag: 25455c88-aae0-4dc5-b898-cd79b779da95
+		summarizeBy: none
+		sourceColumn: Status
+
+	column StatusCodigo
+		dataType: int64
+		formatString: 0
+		lineageTag: 6d51b267-77b4-4243-ad55-de85f13e963b
+		summarizeBy: none
+		sourceColumn: StatusCodigo
+
+	column Classificado
+		dataType: boolean
+		lineageTag: ae8906da-2729-4ca7-a6dd-010308cde52b
+		summarizeBy: none
+		sourceColumn: Classificado
+
+	column VoltaRapida
+		dataType: int64
+		formatString: 0
+		lineageTag: cb03b28c-b33a-474a-bd2b-a88b09d1071f
+		summarizeBy: none
+		sourceColumn: VoltaRapida
+
+	column TempoMs
+		dataType: int64
+		formatString: 0
+		lineageTag: 898b2af7-7a4f-4fbe-8750-61bd43017e01
+		summarizeBy: none
+		sourceColumn: TempoMs
+
+	partition Resultados = m
+		mode: import
+		source =
+				let
+				    MapaP = Record.FromList(Pilotos[PilotoKey], Pilotos[PilotoId]),
+				    MapaE = Record.FromList(Equipes[EquipeKey], Equipes[EquipeId]),
+				    Codigo = (pt as text, st as text) as number =>
+				        if List.Contains({"R", "N"}, pt) then 2
+				        else if List.Contains({"D", "E"}, pt) then 3
+				        else if List.Contains({"W", "F"}, pt) then 4
+				        else if st = "Finished" then 0
+				        else if Text.StartsWith(st, "+") or Text.Contains(st, "Lap") then 1
+				        else 2,
+				    Linhas = List.Combine(List.Transform(RawResultados, (c) =>
+				        let
+				            Ano = Number.From(c[season]),
+				            Rod = Number.From(c[round])
+				        in
+				            List.Transform(c[Results], (x) =>
+				                let
+				                    PT = Record.FieldOrDefault(x, "positionText", ""),
+				                    ST = Record.FieldOrDefault(x, "status", ""),
+				                    VR = Record.FieldOrDefault(x, "FastestLap", null),
+				                    Cod = Codigo(PT, ST)
+				                in
+				                    [
+				                        CorridaKey = Ano * 100 + Rod,
+				                        Temporada = Ano,
+				                        Rodada = Rod,
+				                        PilotoKey = Record.Field(MapaP, x[Driver][driverId]),
+				                        EquipeKey = Record.Field(MapaE, x[Constructor][constructorId]),
+				                        PilotoId = x[Driver][driverId],
+				                        EquipeId = x[Constructor][constructorId],
+				                        NumeroCarro = Record.FieldOrDefault(x, "number", ""),
+				                        Grid = Number.From(Record.FieldOrDefault(x, "grid", "0")),
+				                        Posicao = Number.From(Record.FieldOrDefault(x, "position", "0")),
+				                        PosicaoTexto = PT,
+				                        Pontos = Number.From(Record.FieldOrDefault(x, "points", "0"), "en-US"),
+				                        Voltas = Number.From(Record.FieldOrDefault(x, "laps", "0")),
+				                        Status = ST,
+				                        StatusCodigo = Cod,
+				                        Classificado = Cod <= 1,
+				                        VoltaRapida = if VR is record and Record.FieldOrDefault(VR, "rank", "") = "1" then 1 else 0,
+				                        TempoMs = try Number.From(x[Time][millis]) otherwise null
+				                    ])
+				    )),
+				    Tipo = type table [
+				        CorridaKey = Int64.Type, Temporada = Int64.Type, Rodada = Int64.Type, PilotoKey = Int64.Type, EquipeKey = Int64.Type,
+				        PilotoId = text, EquipeId = text, NumeroCarro = text, Grid = Int64.Type, Posicao = Int64.Type, PosicaoTexto = text,
+				        Pontos = number, Voltas = Int64.Type, Status = text, StatusCodigo = Int64.Type, Classificado = logical,
+				        VoltaRapida = Int64.Type, TempoMs = Int64.Type
+				    ],
+				    Tabela = Value.ReplaceType(Table.FromRecords(Linhas, Table.ColumnNames(#table(Tipo, {}))), Tipo)
+				in
+				    Tabela
+

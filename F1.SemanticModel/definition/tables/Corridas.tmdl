@@ -1,0 +1,133 @@
+table Corridas
+	lineageTag: 3fd49580-8a83-4746-86f4-e15318516068
+
+	column CorridaKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1b8a81a8-0e3c-4371-9a72-52e781ac82ab
+		summarizeBy: none
+		sourceColumn: CorridaKey
+
+	column Temporada
+		dataType: int64
+		formatString: 0
+		lineageTag: 9b3f0ca2-1bf3-44d5-9178-2ffb1cd250f9
+		summarizeBy: none
+		sourceColumn: Temporada
+
+	column Rodada
+		dataType: int64
+		formatString: 0
+		lineageTag: a8c68999-b527-4251-b946-c675703919c4
+		summarizeBy: none
+		sourceColumn: Rodada
+
+	column NomeCorrida
+		dataType: string
+		lineageTag: 1be46328-4783-4e05-aadd-434330652f96
+		summarizeBy: none
+		sourceColumn: NomeCorrida
+		sortByColumn: CorridaKey
+
+	column GP
+		dataType: string
+		lineageTag: 29eb574d-390f-43fd-a041-6f33d0caddf9
+		summarizeBy: none
+		sourceColumn: GP
+
+	column Data
+		dataType: string
+		isHidden
+		lineageTag: 384e8057-c6dd-480f-9890-ba0d9dcde144
+		summarizeBy: none
+		sourceColumn: Data
+
+	column DataCorrida
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 10d856d8-c077-4cb6-89fa-2c5cd8b191d2
+		summarizeBy: none
+		sourceColumn: DataCorrida
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column CircuitoId
+		dataType: string
+		isHidden
+		lineageTag: 796c7333-8078-4b5c-bf1e-7f4207d1b312
+		summarizeBy: none
+		sourceColumn: CircuitoId
+
+	column CircuitoKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 3e968279-04c3-4b5c-bf04-950a7b484632
+		summarizeBy: none
+		sourceColumn: CircuitoKey
+
+	column Voltas
+		dataType: int64
+		formatString: 0
+		lineageTag: 535941ee-a880-4f49-8588-db6e3b93200c
+		summarizeBy: none
+		sourceColumn: Voltas
+
+	column TempoVencedorMs
+		dataType: int64
+		formatString: 0
+		lineageTag: c5314f29-e804-4129-9773-ac039af0f7f4
+		summarizeBy: none
+		sourceColumn: TempoVencedorMs
+
+	column UrlWiki
+		dataType: string
+		lineageTag: a80f3aa1-37f8-4da7-b35b-7cafa12a812d
+		dataCategory: WebUrl
+		summarizeBy: none
+		sourceColumn: UrlWiki
+
+	partition Corridas = m
+		mode: import
+		source =
+				let
+				    MapaCirc = Record.FromList(Circuitos[CircuitoKey], Circuitos[CircuitoId]),
+				    InfoVencedor = List.Combine(List.Transform(RawResultados, (c) =>
+				        List.Transform(List.Select(c[Results], (x) => Record.FieldOrDefault(x, "position", "") = "1"), (w) =>
+				            [
+				                K = Text.From(Number.From(c[season]) * 100 + Number.From(c[round])),
+				                V = Number.From(Record.FieldOrDefault(w, "laps", "0")),
+				                T = try Number.From(w[Time][millis]) otherwise 0
+				            ]))),
+				    TabInfo = Table.Distinct(Value.ReplaceType(Table.FromRecords(InfoVencedor, Table.ColumnNames(#table(type table [K = text, V = number, T = number], {}))), type table [K = text, V = number, T = number]), {"K"}),
+				    MapaInfo = Record.FromList(Table.ToRecords(TabInfo), TabInfo[K]),
+				    Linhas = List.Transform(RawCorridas, (r) =>
+				        let
+				            Ano = Number.From(r[season]),
+				            Rod = Number.From(r[round]),
+				            Chave = Ano * 100 + Rod,
+				            Extra = Record.FieldOrDefault(MapaInfo, Text.From(Chave), [V = 0, T = 0])
+				        in
+				            [
+				                CorridaKey = Chave,
+				                Temporada = Ano,
+				                Rodada = Rod,
+				                NomeCorrida = r[raceName],
+				                GP = Text.Trim(Text.Replace(r[raceName], "Grand Prix", "")),
+				                Data = r[date],
+				                DataCorrida = Date.FromText(r[date], [Format = "yyyy-MM-dd", Culture = "en-US"]),
+				                CircuitoId = r[Circuit][circuitId],
+				                CircuitoKey = Record.Field(MapaCirc, r[Circuit][circuitId]),
+				                Voltas = Extra[V],
+				                TempoVencedorMs = Extra[T],
+				                UrlWiki = Record.FieldOrDefault(r, "url", "")
+				            ]),
+				    Tipo = type table [
+				        CorridaKey = Int64.Type, Temporada = Int64.Type, Rodada = Int64.Type, NomeCorrida = text, GP = text, Data = text,
+				        DataCorrida = date, CircuitoId = text, CircuitoKey = Int64.Type, Voltas = Int64.Type, TempoVencedorMs = Int64.Type, UrlWiki = text
+				    ],
+				    Tabela = Table.Distinct(Value.ReplaceType(Table.FromRecords(Linhas, Table.ColumnNames(#table(Tipo, {}))), Tipo), {"CorridaKey"})
+				in
+				    Tabela
+

@@ -1,0 +1,84 @@
+table Circuitos
+	lineageTag: 0ad36f0d-3eea-413a-bdf5-e6f19c38bcc9
+
+	column CircuitoKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8dd1b9db-4e1e-4ad6-8d27-040fecceb942
+		summarizeBy: none
+		sourceColumn: CircuitoKey
+
+	column CircuitoId
+		dataType: string
+		lineageTag: da033b9f-e1f7-41e8-9f45-9db4f5b2eb64
+		summarizeBy: none
+		sourceColumn: CircuitoId
+
+	column Circuito
+		dataType: string
+		lineageTag: c0da3013-6284-414c-b035-52ec2c4b2ba2
+		summarizeBy: none
+		sourceColumn: Circuito
+
+	column Cidade
+		dataType: string
+		lineageTag: 370c1f98-aa6f-48d8-90a7-050d433f2e97
+		summarizeBy: none
+		sourceColumn: Cidade
+
+	column Pais
+		dataType: string
+		lineageTag: 96ea047c-9926-4144-adee-1e6a1c80951a
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Pais
+
+	column Latitude
+		dataType: double
+		lineageTag: cb87f272-e592-41a7-b4ab-c57dafdc36b6
+		dataCategory: Latitude
+		summarizeBy: none
+		sourceColumn: Latitude
+
+	column Longitude
+		dataType: double
+		lineageTag: 322888f7-74e2-4907-999d-0ea28779882a
+		dataCategory: Longitude
+		summarizeBy: none
+		sourceColumn: Longitude
+
+	column UrlWiki
+		dataType: string
+		lineageTag: ecb58c90-aaec-400b-a18e-e5805056571a
+		dataCategory: WebUrl
+		summarizeBy: none
+		sourceColumn: UrlWiki
+
+	partition Circuitos = m
+		mode: import
+		source =
+				let
+				    Linhas = List.Transform(RawCorridas, (r) =>
+				        let
+				            C = r[Circuit],
+				            L = Record.FieldOrDefault(C, "Location", [])
+				        in
+				            [
+				                CircuitoId = C[circuitId],
+				                Circuito = C[circuitName],
+				                Cidade = Record.FieldOrDefault(L, "locality", ""),
+				                Pais = Record.FieldOrDefault(L, "country", ""),
+				                Latitude = Number.From(Record.FieldOrDefault(L, "lat", "0"), "en-US"),
+				                Longitude = Number.From(Record.FieldOrDefault(L, "long", "0"), "en-US"),
+				                UrlWiki = Record.FieldOrDefault(C, "url", "")
+				            ]),
+				    Tipo = type table [CircuitoId = text, Circuito = text, Cidade = text, Pais = text, Latitude = number, Longitude = number, UrlWiki = text],
+				    Tabela = Table.Distinct(Value.ReplaceType(Table.FromRecords(Linhas, Table.ColumnNames(#table(Tipo, {}))), Tipo), {"CircuitoId"}),
+				    Ordenado = Table.Sort(Tabela, {{"CircuitoId", Order.Ascending}}),
+				    ComChave = Table.AddIndexColumn(Ordenado, "CircuitoKey", 1, 1, Int64.Type)
+				in
+				    ComChave
+
+	annotation PBI_ResultType = Exception
+

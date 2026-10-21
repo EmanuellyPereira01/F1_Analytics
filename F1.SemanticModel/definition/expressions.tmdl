@@ -1,0 +1,110 @@
+expression AnoInicial = 2014 meta [IsParameterQuery=true, Type="Number", IsParameterQueryRequired=true]
+	lineageTag: d11d20d6-32a7-4304-b0c3-4a07258cb88e
+
+	annotation PBI_ResultType = Number
+
+expression AnoFinal = 2026 meta [IsParameterQuery=true, Type="Number", IsParameterQueryRequired=true]
+	lineageTag: 5419adf1-fed3-4dc8-99ad-7cc1c9771e60
+
+	annotation PBI_ResultType = Number
+
+expression IncluirFotos = true meta [IsParameterQuery=true, Type="Logical", IsParameterQueryRequired=true]
+	lineageTag: 50144cc3-fffb-4301-b83d-68a8d5977520
+
+	annotation PBI_ResultType = Logical
+
+expression Jolpica =
+		(caminho as text, tabela as text, lista as text) as list =>
+		let
+		    Pagina = (offset as number, tentativa as number) as record =>
+		        let
+		            Resposta = Function.InvokeAfter(
+		                () =>
+		                    let
+		                        Bruto = Web.Contents(
+		                            "https://api.jolpi.ca",
+		                            [
+		                                RelativePath = "ergast/f1/" & caminho & ".json",
+		                                Query = [limit = "100", offset = Text.From(offset)],
+		                                Headers = [#"User-Agent" = "F1-Analytics-PowerBI/1.0"],
+		                                ManualStatusHandling = {429, 500, 502, 503, 504},
+		                                IsRetry = tentativa > 0,
+		                                Timeout = #duration(0, 0, 2, 0)
+		                            ]
+		                        ),
+		                        CodigoHttp = Value.Metadata(Bruto)[#"Response.Status"]
+		                    in
+		                        [St = CodigoHttp, Corpo = if CodigoHttp = 200 then Binary.Buffer(Bruto) else null],
+		                #duration(0, 0, 0, if tentativa = 0 then 0.3 else 4 * tentativa)
+		            ),
+		            Saida =
+		                if Resposta[St] = 200 then Json.Document(Resposta[Corpo])[MRData]
+		                else if tentativa < 4 then @Pagina(offset, tentativa + 1)
+		                else error Error.Record("Jolpica", "HTTP " & Text.From(Resposta[St]) & " em " & caminho)
+		        in
+		            Saida,
+		    Primeira = Pagina(0, 0),
+		    Total = Number.From(Primeira[total]),
+		    Offsets = List.Numbers(100, List.Max({0, Number.RoundUp(Total / 100) - 1}), 100),
+		    Paginas = {Primeira} & List.Transform(Offsets, (o) => Pagina(o, 0)),
+		    Itens = List.Combine(List.Transform(Paginas, (p) => Record.Field(Record.Field(p, tabela), lista)))
+		in
+		    Itens
+	lineageTag: 7783c88c-d9b9-4a96-bb86-08b81f4ce35d
+
+	annotation PBI_ResultType = Function
+
+expression RawCorridas =
+		let
+		    Lista = Jolpica("races", "RaceTable", "Races")
+		in
+		    Lista
+	lineageTag: 9f10cc7b-d68e-46c8-9922-16a92d7b7206
+
+	annotation PBI_ResultType = List
+
+expression RawResultados =
+		let
+		    Lista = List.Combine(List.Transform({AnoInicial..AnoFinal}, (ano) => Jolpica(Text.From(ano) & "/results", "RaceTable", "Races")))
+		in
+		    Lista
+	lineageTag: 5167d1cc-c663-4e58-b565-4d79651ea69b
+
+	annotation PBI_ResultType = List
+
+expression RawSprints =
+		let
+		    Lista = List.Combine(List.Transform({AnoInicial..AnoFinal}, (ano) => Jolpica(Text.From(ano) & "/sprint", "RaceTable", "Races")))
+		in
+		    Lista
+	lineageTag: 31603a32-07e6-4f13-acfb-7cc86b6a7b18
+
+	annotation PBI_ResultType = List
+
+expression RawVitorias =
+		let
+		    Lista = Jolpica("results/1", "RaceTable", "Races")
+		in
+		    Lista
+	lineageTag: 3d9895e0-01f8-4494-a586-f52653fdf8a7
+
+	annotation PBI_ResultType = List
+
+expression RawClassifPilotos =
+		let
+		    Lista = List.Combine(List.Transform({AnoInicial..AnoFinal}, (ano) => Jolpica(Text.From(ano) & "/driverstandings", "StandingsTable", "StandingsLists")))
+		in
+		    Lista
+	lineageTag: e25985f1-d80a-4379-af78-b9044cb428b1
+
+	annotation PBI_ResultType = List
+
+expression RawClassifEquipes =
+		let
+		    Lista = List.Combine(List.Transform({AnoInicial..AnoFinal}, (ano) => Jolpica(Text.From(ano) & "/constructorstandings", "StandingsTable", "StandingsLists")))
+		in
+		    Lista
+	lineageTag: e51aa84a-ef4b-4b1d-a20a-2aa1061aabb9
+
+	annotation PBI_ResultType = List
+

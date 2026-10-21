@@ -1,0 +1,74 @@
+table Vitorias
+	lineageTag: 52596db7-b610-43c2-9f31-594347ba487a
+
+	column CorridaKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f33297e1-9ee9-4411-9f2d-170a7cf0e575
+		summarizeBy: none
+		sourceColumn: CorridaKey
+
+	column Temporada
+		dataType: int64
+		formatString: 0
+		lineageTag: e745f141-6fe9-4ab2-978f-4d1e3efe4413
+		summarizeBy: none
+		sourceColumn: Temporada
+
+	column Rodada
+		dataType: int64
+		formatString: 0
+		lineageTag: 7f05eaae-b08c-4407-a443-d905b79bbd66
+		summarizeBy: none
+		sourceColumn: Rodada
+
+	column PilotoKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ad6dfbd8-823c-469e-b102-347f67398bb8
+		summarizeBy: none
+		sourceColumn: PilotoKey
+
+	column EquipeKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ce889c6c-b1b6-4e62-96d3-99290b06507f
+		summarizeBy: none
+		sourceColumn: EquipeKey
+
+	column Grid
+		dataType: int64
+		formatString: 0
+		lineageTag: 8b8c7a5b-cadd-474b-ad10-90e0fe3d5e73
+		summarizeBy: none
+		sourceColumn: Grid
+
+	partition Vitorias = m
+		mode: import
+		source =
+				let
+				    MapaP = Record.FromList(Pilotos[PilotoKey], Pilotos[PilotoId]),
+				    MapaE = Record.FromList(Equipes[EquipeKey], Equipes[EquipeId]),
+				    Linhas = List.Combine(List.Transform(RawVitorias, (c) =>
+				        let
+				            Ano = Number.From(c[season]),
+				            Rod = Number.From(c[round])
+				        in
+				            List.Transform(c[Results], (x) =>
+				                [
+				                    CorridaKey = Ano * 100 + Rod,
+				                    Temporada = Ano,
+				                    Rodada = Rod,
+				                    PilotoKey = Record.Field(MapaP, x[Driver][driverId]),
+				                    EquipeKey = Record.Field(MapaE, x[Constructor][constructorId]),
+				                    Grid = Number.From(Record.FieldOrDefault(x, "grid", "0"))
+				                ])
+				    )),
+				    Tipo = type table [CorridaKey = Int64.Type, Temporada = Int64.Type, Rodada = Int64.Type, PilotoKey = Int64.Type, EquipeKey = Int64.Type, Grid = Int64.Type],
+				    Tabela = Value.ReplaceType(Table.FromRecords(Linhas, Table.ColumnNames(#table(Tipo, {}))), Tipo)
+				in
+				    Tabela
+

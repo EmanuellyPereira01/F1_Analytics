@@ -1,0 +1,126 @@
+-- Medidas do modelo. Cabeçalho: "-- @measure Nome | Pasta de exibição | formato (opcional)".
+-- O build.py lê este arquivo e grava cada medida em _Medidas.tmdl. As medidas <HTML>/<CSS> das
+-- páginas são geradas a partir de _staging/js/.
+
+-- @measure JS Dados | Base
+-- Serializa o modelo inteiro num objeto JavaScript compacto (arrays com chaves inteiras).
+-- O formato de cada lista está documentado em _staging/js/comum.js (seção "dados").
+VAR _pl = CONCATENATEX(
+    ALL(Pilotos),
+    "[" & Pilotos[PilotoKey] & ",'" & Pilotos[PilotoId] & "','" & Pilotos[Codigo] & "','" & Pilotos[Numero]
+        & "','" & SUBSTITUTE(Pilotos[Nome], "'", "\'") & "','" & SUBSTITUTE(Pilotos[Sobrenome], "'", "\'")
+        & "','" & Pilotos[Nascimento] & "','" & Pilotos[Nacionalidade] & "','"
+        & SUBSTITUTE(COALESCE(LOOKUPVALUE(FotosPilotos[Foto], FotosPilotos[PilotoId], Pilotos[PilotoId]), ""), "'", "%27") & "']",
+    ",", Pilotos[PilotoKey], ASC
+)
+VAR _eq = CONCATENATEX(
+    ALL(Equipes),
+    "[" & Equipes[EquipeKey] & ",'" & Equipes[EquipeId] & "','" & SUBSTITUTE(Equipes[Equipe], "'", "\'")
+        & "','" & Equipes[Nacionalidade] & "','" & Equipes[Cor] & "']",
+    ",", Equipes[EquipeKey], ASC
+)
+VAR _ci = CONCATENATEX(
+    ALL(Circuitos),
+    "[" & Circuitos[CircuitoKey] & ",'" & Circuitos[CircuitoId] & "','" & SUBSTITUTE(Circuitos[Circuito], "'", "\'")
+        & "','" & SUBSTITUTE(Circuitos[Cidade], "'", "\'") & "','" & SUBSTITUTE(Circuitos[Pais], "'", "\'") & "',"
+        & FORMAT(Circuitos[Latitude], "0.0####", "en-US") & "," & FORMAT(Circuitos[Longitude], "0.0####", "en-US") & "]",
+    ",", Circuitos[CircuitoKey], ASC
+)
+VAR _co = CONCATENATEX(
+    ALL(Corridas),
+    "[" & Corridas[CorridaKey] & "," & Corridas[CircuitoKey] & ",'" & SUBSTITUTE(Corridas[GP], "'", "\'") & "','"
+        & Corridas[Data] & "'," & COALESCE(Corridas[Voltas], 0) & "," & COALESCE(Corridas[TempoVencedorMs], 0) & "]",
+    ",", Corridas[CorridaKey], ASC
+)
+VAR _rs = CONCATENATEX(
+    ALL(Resultados),
+    "[" & Resultados[CorridaKey] & "," & Resultados[PilotoKey] & "," & Resultados[EquipeKey] & ","
+        & COALESCE(Resultados[Grid], 0) & "," & COALESCE(Resultados[Posicao], 0) & ","
+        & FORMAT(Resultados[Pontos], "0.0#", "en-US") & "," & Resultados[StatusCodigo] & "," & Resultados[VoltaRapida] & "]",
+    ","
+)
+VAR _sp = CONCATENATEX(
+    ALL(Sprints),
+    "[" & Sprints[CorridaKey] & "," & Sprints[PilotoKey] & "," & Sprints[EquipeKey] & ","
+        & COALESCE(Sprints[Posicao], 0) & "," & FORMAT(Sprints[Pontos], "0.0#", "en-US") & "]",
+    ","
+)
+VAR _vi = CONCATENATEX(
+    ALL(Vitorias),
+    "[" & Vitorias[CorridaKey] & "," & Vitorias[PilotoKey] & "," & Vitorias[EquipeKey] & "," & COALESCE(Vitorias[Grid], 0) & "]",
+    ",", Vitorias[CorridaKey], ASC
+)
+VAR _cp = CONCATENATEX(
+    ALL(ClassifPilotos),
+    "[" & ClassifPilotos[Temporada] & "," & ClassifPilotos[Rodada] & "," & COALESCE(ClassifPilotos[Posicao], 0) & ","
+        & ClassifPilotos[PilotoKey] & "," & COALESCE(ClassifPilotos[EquipeKey], 0) & ","
+        & FORMAT(ClassifPilotos[Pontos], "0.0#", "en-US") & "," & ClassifPilotos[NumVitorias] & "]",
+    ","
+)
+VAR _ce = CONCATENATEX(
+    ALL(ClassifEquipes),
+    "[" & ClassifEquipes[Temporada] & "," & ClassifEquipes[Rodada] & "," & COALESCE(ClassifEquipes[Posicao], 0) & ","
+        & ClassifEquipes[EquipeKey] & "," & FORMAT(ClassifEquipes[Pontos], "0.0#", "en-US") & "," & ClassifEquipes[NumVitorias] & "]",
+    ","
+)
+VAR _ch = CONCATENATEX(
+    ALL(CampeoesHistoricos),
+    "[" & CampeoesHistoricos[Ano] & ",'" & SUBSTITUTE(CampeoesHistoricos[Piloto], "'", "\'") & "','"
+        & SUBSTITUTE(CampeoesHistoricos[Equipe], "'", "\'") & "'," & CampeoesHistoricos[PilotoKey] & "]",
+    ",", CampeoesHistoricos[Ano], ASC
+)
+VAR _versao = COUNTROWS(ALL(Resultados)) * 1000 + COUNTROWS(ALL(Corridas))
+RETURN
+    "window.F1_DADOS={v:" & _versao & ",pl:[" & _pl & "],eq:[" & _eq & "],ci:[" & _ci & "],co:[" & _co
+        & "],rs:[" & _rs & "],sp:[" & _sp & "],vi:[" & _vi & "],cp:[" & _cp & "],ce:[" & _ce & "],ch:[" & _ch & "]};"
+
+-- @measure Corridas Disputadas | KPIs | 0
+CALCULATE(COUNTROWS(Resultados), Resultados[StatusCodigo] <> 4)
+
+-- @measure Vitórias no Período | KPIs | 0
+CALCULATE(COUNTROWS(Resultados), Resultados[Posicao] = 1, Resultados[Classificado] = TRUE())
+
+-- @measure Pódios | KPIs | 0
+CALCULATE(COUNTROWS(Resultados), Resultados[Posicao] <= 3, Resultados[Classificado] = TRUE())
+
+-- @measure Poles | KPIs | 0
+CALCULATE(COUNTROWS(Resultados), Resultados[Grid] = 1)
+
+-- @measure Voltas Mais Rápidas | KPIs | 0
+CALCULATE(COUNTROWS(Resultados), Resultados[VoltaRapida] = 1)
+
+-- @measure Pontos | KPIs | #,0.#
+SUM(Resultados[Pontos]) + SUM(Sprints[Pontos])
+
+-- @measure Abandonos | KPIs | 0
+CALCULATE(COUNTROWS(Resultados), Resultados[StatusCodigo] IN {2, 3})
+
+-- @measure Taxa de Vitória | KPIs | 0.0%
+DIVIDE([Vitórias no Período], [Corridas Disputadas])
+
+-- @measure Taxa de Pódio | KPIs | 0.0%
+DIVIDE([Pódios], [Corridas Disputadas])
+
+-- @measure Taxa de Abandono | KPIs | 0.0%
+DIVIDE([Abandonos], [Corridas Disputadas])
+
+-- @measure Pontos por Corrida | KPIs | 0.00
+DIVIDE([Pontos], [Corridas Disputadas])
+
+-- @measure Posições Ganhas (média) | KPIs | 0.00
+AVERAGEX(
+    FILTER(Resultados, Resultados[Classificado] && Resultados[Grid] > 0),
+    Resultados[Grid] - Resultados[Posicao]
+)
+
+-- @measure Conversão Pole em Vitória | KPIs | 0.0%
+DIVIDE(
+    CALCULATE(COUNTROWS(Resultados), Resultados[Grid] = 1, Resultados[Posicao] = 1, Resultados[Classificado] = TRUE()),
+    [Poles]
+)
+
+-- @measure Vitórias na Carreira | KPIs | 0
+COUNTROWS(Vitorias)
+
+-- @measure Títulos Mundiais | KPIs | 0
+COUNTROWS(CampeoesHistoricos)

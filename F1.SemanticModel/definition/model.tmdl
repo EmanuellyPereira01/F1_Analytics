@@ -1,0 +1,31 @@
+model Model
+	culture: pt-BR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: pt-BR
+	valueFilterBehavior: independent
+	dataAccessOptions
+		fastCombine
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_ProTooling = ["DevMode"]
+
+annotation PBI_QueryOrder = ["AnoInicial","AnoFinal","IncluirFotos","Jolpica","RawCorridas","RawResultados","RawSprints","RawVitorias","RawClassifPilotos","RawClassifEquipes","Circuitos","Corridas","Pilotos","FotosPilotos","Equipes","Resultados","Sprints","Vitorias","ClassifPilotos","ClassifEquipes","CampeoesHistoricos","_Medidas"]
+
+ref table Circuitos
+ref table Corridas
+ref table Pilotos
+ref table FotosPilotos
+ref table Equipes
+ref table Resultados
+ref table Sprints
+ref table Vitorias
+ref table ClassifPilotos
+ref table ClassifEquipes
+ref table CampeoesHistoricos
+ref table _Medidas
+
+ref cultureInfo pt-BR
+

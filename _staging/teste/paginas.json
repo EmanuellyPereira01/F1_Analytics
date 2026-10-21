@@ -1,0 +1,8 @@
+{
+  "Pilotos": ["pilotos"],
+  "Duelo": ["duelo"],
+  "Temporada": ["temporada"],
+  "Circuitos": ["mapa", "circuitos"],
+  "Simulador": ["sim", "corrida"],
+  "Quiz": ["quiz"]
+}

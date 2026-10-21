@@ -1,0 +1,74 @@
+table ClassifEquipes
+	lineageTag: b8cfd544-5392-4909-9c2c-1dff11ce1c7d
+
+	column Temporada
+		dataType: int64
+		formatString: 0
+		lineageTag: fc6a0470-1ac4-4c47-819b-7d910135e395
+		summarizeBy: none
+		sourceColumn: Temporada
+
+	column Rodada
+		dataType: int64
+		formatString: 0
+		lineageTag: a9f76036-6894-4362-8fe9-c1b90f886aa4
+		summarizeBy: none
+		sourceColumn: Rodada
+
+	column Posicao
+		dataType: int64
+		formatString: 0
+		lineageTag: 01839416-faea-4cfe-9a3e-2456922e9e61
+		summarizeBy: none
+		sourceColumn: Posicao
+
+	column EquipeKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1560d4d3-804c-4a58-a5a8-bd658d757c26
+		summarizeBy: none
+		sourceColumn: EquipeKey
+
+	column Pontos
+		dataType: double
+		formatString: #,0.#
+		lineageTag: 0c9f246d-84fa-440e-8b5b-95daad0c8134
+		summarizeBy: none
+		sourceColumn: Pontos
+
+	column NumVitorias
+		dataType: int64
+		formatString: 0
+		lineageTag: 85279f6c-9898-4749-bbb3-b9b1c4c0b051
+		summarizeBy: none
+		sourceColumn: NumVitorias
+
+	partition ClassifEquipes = m
+		mode: import
+		source =
+				let
+				    MapaE = Record.FromList(Equipes[EquipeKey], Equipes[EquipeId]),
+				    Linhas = List.Combine(List.Transform(RawClassifEquipes, (s) =>
+				        let
+				            Ano = Number.From(s[season]),
+				            Rod = Number.From(s[round])
+				        in
+				            List.Transform(s[ConstructorStandings], (x) =>
+				                let
+				                    Pos = Record.FieldOrDefault(x, "position", null)
+				                in
+				                    [
+				                        Temporada = Ano,
+				                        Rodada = Rod,
+				                        Posicao = if Pos = null then null else Number.From(Pos),
+				                        EquipeKey = Record.Field(MapaE, x[Constructor][constructorId]),
+				                        Pontos = Number.From(Record.FieldOrDefault(x, "points", "0"), "en-US"),
+				                        NumVitorias = Number.From(Record.FieldOrDefault(x, "wins", "0"))
+				                    ])
+				    )),
+				    Tipo = type table [Temporada = Int64.Type, Rodada = Int64.Type, Posicao = Int64.Type, EquipeKey = Int64.Type, Pontos = number, NumVitorias = Int64.Type],
+				    Tabela = Value.ReplaceType(Table.FromRecords(Linhas, Table.ColumnNames(#table(Tipo, {}))), Tipo)
+				in
+				    Tabela
+

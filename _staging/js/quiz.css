@@ -1,0 +1,63 @@
+.qz-caixa { left: 16px; top: 60px; width: 960px; height: 644px; padding: 22px 28px; overflow: hidden; }
+.qz-lado { left: 992px; top: 60px; width: 272px; height: 644px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.qz-pl { background: #0E1118; border: 1px solid var(--borda); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; }
+.qz-pl small { font-size: 10px; letter-spacing: 1.4px; color: var(--txt2); font-weight: 700; }
+.qz-pl b { font-size: 32px; font-weight: 900; line-height: 1.1; }
+.qz-pl b span { font-size: 16px; color: var(--txt3); }
+.qz-pl.rec { border-color: #5A4A1A; background: linear-gradient(140deg, rgba(255, 210, 74, .12), transparent); }
+.qz-pl.rec b { color: #FFD24A; }
+.qz-regras { margin-top: auto; font-size: 11px; color: var(--txt3); line-height: 1.5; }
+
+.qz-ini { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 18px; }
+.qz-logo { width: 84px; height: 84px; border-radius: 22px; background: linear-gradient(150deg, var(--red), #5A0300); display: grid; place-items: center; transform: rotate(-6deg); box-shadow: 0 12px 30px rgba(225, 6, 0, .35); }
+.qz-logo b { font-size: 50px; font-weight: 900; transform: rotate(6deg); }
+.qz-logo.fim { background: linear-gradient(150deg, #FFD24A, #8A6400); }
+.qz-ini h2 { margin: 18px 0 2px; font-size: 30px; font-weight: 900; }
+.qz-ini p { margin: 0; color: var(--txt2); font-size: 14px; }
+.qz-modos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 26px 0 18px; width: 100%; }
+.qz-modo { appearance: none; border: 1px solid var(--borda2); background: #0E1118; color: var(--txt); border-radius: 14px; padding: 16px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; align-items: center; transition: transform .12s, border-color .12s; }
+.qz-modo:hover { transform: translateY(-2px); border-color: #4A5468; }
+.qz-modo.on { border-color: var(--red); background: linear-gradient(180deg, rgba(225, 6, 0, .16), #0E1118); box-shadow: 0 0 0 1px var(--red); }
+.qz-modo b { font-size: 14px; }
+.qz-modo small { font-size: 11px; color: var(--txt2); }
+.qz-modo em { font-style: normal; font-size: 10.5px; color: #FFD24A; margin-top: 6px; font-weight: 700; }
+.qz-cfg { display: flex; gap: 10px; align-items: center; color: var(--txt2); font-weight: 700; margin-bottom: 22px; }
+.qz-go { height: 46px; padding: 0 34px; font-size: 16px; }
+.qz-novo { margin: 14px 0; font-size: 20px; font-weight: 900; color: #FFD24A; animation: f1-pulso 1.2s infinite; }
+.qz-rec { margin: 10px 0 !important; }
+.qz-fim-bts { display: flex; gap: 10px; margin-top: 20px; }
+
+.qz-top { display: flex; align-items: center; gap: 14px; color: var(--txt2); font-size: 13px; }
+.qz-top b { color: #fff; }
+.qz-tempo { flex: 1; height: 8px; background: #1A1F2B; border-radius: 4px; overflow: hidden; }
+.qz-tempo i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--ok), #9BE15D); border-radius: 4px; transition: width .1s linear; }
+.qz-tempo i.alerta { background: linear-gradient(90deg, var(--red), #FF7A45); }
+.qz-seg { width: 34px; text-align: right; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+.qz-corpo { display: flex; gap: 28px; align-items: center; margin: 26px 0 22px; height: 230px; }
+.qz-sil { width: 210px; height: 210px; border-radius: 50%; flex: none; position: relative; overflow: hidden; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--c) 55%, #222), #0B0D12 75%); box-shadow: 0 0 0 4px var(--c), 0 0 40px color-mix(in srgb, var(--c) 50%, transparent); display: grid; place-items: center; }
+.qz-sil img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; filter: brightness(0) drop-shadow(0 0 0 #000); transition: filter .6s; }
+.qz-sil span { font-size: 96px; font-weight: 900; color: rgba(255, 255, 255, .18); }
+.qz-sil.revela img { filter: none; }
+.qz-sil.cl { background: none; box-shadow: none; overflow: visible; }
+.qz-trofeu { width: 210px; height: 210px; flex: none; display: grid; place-items: center; font-size: 110px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 210, 74, .18), transparent 65%); color: #FFD24A; }
+.qz-enun h3 { margin: 0 0 14px; font-size: 26px; font-weight: 900; line-height: 1.2; }
+.qz-pistas { display: flex; flex-direction: column; gap: 6px; }
+.qz-pista { font-size: 14px; color: var(--txt2); display: flex; gap: 8px; align-items: center; transition: opacity .4s, filter .4s; }
+.qz-pista b { color: #fff; }
+.qz-pista.oculta { opacity: .12; filter: blur(5px); }
+.qz-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.qz-op { appearance: none; border: 1px solid var(--borda2); border-left: 5px solid var(--c); background: #0E1118; color: var(--txt); border-radius: 12px; height: 62px; display: flex; align-items: center; gap: 12px; padding: 0 16px; cursor: pointer; font-size: 16px; text-align: left; transition: transform .1s, background .15s, border-color .15s; }
+.qz-op:hover:not(:disabled) { background: #1A1F2B; transform: translateY(-1px); }
+.qz-op kbd { font-family: inherit; font-size: 11px; font-weight: 900; color: var(--txt3); border: 1px solid var(--borda2); border-radius: 5px; padding: 1px 6px; }
+.qz-op .f1-av.mini { width: 34px; height: 34px; }
+.qz-op .qz-eq { width: 28px; height: 28px; border-radius: 8px; background: var(--c); flex: none; }
+.qz-op.certo { background: rgba(43, 212, 125, .16); border-color: var(--ok); }
+.qz-op.errado { background: rgba(225, 6, 0, .16); border-color: var(--red); animation: qz-treme .35s; }
+.qz-op:disabled { cursor: default; }
+@keyframes qz-treme { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.qz-fb { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; min-height: 44px; }
+.qz-fb .ok, .qz-fb .nok { font-size: 20px; font-weight: 900; }
+.qz-fb .ok { color: var(--ok); }
+.qz-fb .nok { color: var(--red2); }
+.qz-fb span { color: var(--txt2); font-size: 14px; font-weight: 600; margin-left: 8px; }
+.qz-prox { height: 42px; padding: 0 22px; font-size: 14px; }
